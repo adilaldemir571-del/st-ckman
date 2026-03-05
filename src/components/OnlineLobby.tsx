@@ -77,6 +77,14 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({ playerName, onJoinRoom
         </div>
 
         <button 
+          onClick={() => onJoinRoom('CREATIVE', playerName)}
+          className="w-full bg-indigo-600 text-white font-black py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        >
+          <Users className="w-5 h-5" />
+          JOIN PUBLIC CREATIVE ROOM
+        </button>
+
+        <button 
           onClick={handleCreate}
           className="w-full bg-white text-black font-black py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >

@@ -34,6 +34,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ mode, mapId, onGameOver,
           const player = engineRef.current.players.find(p => p.id === id);
           if (player) {
             Object.assign(player, state);
+          } else {
+            // Add new player if they don't exist
+            engineRef.current.players.push({
+              id,
+              ...state
+            });
           }
         }
       });
@@ -61,6 +67,50 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ mode, mapId, onGameOver,
       socket.off('remote-player-hit');
     };
   }, [isOnline]);
+
+  useEffect(() => {
+    if (isOnline && roomData && engineRef.current) {
+      // Remove players that left
+      engineRef.current.players = engineRef.current.players.filter(p => 
+        p.isAI || roomData.players[p.id as string]
+      );
+      
+      // Add players that joined
+      Object.values(roomData.players).forEach((rp: any) => {
+        if (!engineRef.current!.players.find(p => p.id === rp.id)) {
+          engineRef.current!.players.push({
+            id: rp.id,
+            name: rp.name,
+            color: rp.color,
+            position: { x: 400, y: 100 }, // Default spawn
+            velocity: { x: 0, y: 0 },
+            width: 30,
+            height: 70,
+            health: 100,
+            maxHealth: 100,
+            state: 'idle',
+            facing: 1,
+            isGrounded: false,
+            currentWeapon: 'sword',
+            attackCooldown: 0,
+            maxAttackCooldown: 0,
+            blockCooldown: 0,
+            weaponSwitchCooldown: 0,
+            maxWeaponSwitchCooldown: 0,
+            hitStun: 0,
+            projectiles: [],
+            score: 0,
+            wins: 0,
+            shield: 100,
+            maxShield: 100,
+            lastHitTimer: 0,
+            isAI: false,
+            buffs: { damage: 1, speed: 1, timer: 0 }
+          });
+        }
+      });
+    }
+  }, [roomData, isOnline]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

@@ -54,4 +54,18 @@ export const MAPS: Record<string, GameMap> = {
       { x: 350, y: 200, width: 100, height: 20, type: 'solid' }, // Top perch
     ],
   },
+  creative: {
+    id: 'creative',
+    name: 'Creative Sandbox',
+    backgroundColor: '#1e1e2f',
+    groundColor: '#2d2d44',
+    spawnP1: { x: 100, y: 400 },
+    spawnP2: { x: 700, y: 400 },
+    platforms: [
+      { x: 0, y: 500, width: 800, height: 100, type: 'solid' }, // Ground
+      { x: 100, y: 350, width: 200, height: 20, type: 'solid' },
+      { x: 500, y: 350, width: 200, height: 20, type: 'solid' },
+      { x: 300, y: 200, width: 200, height: 20, type: 'solid' },
+    ],
+  },
 };

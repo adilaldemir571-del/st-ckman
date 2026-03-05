@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { socket, connectSocket, disconnectSocket } from './socket';
 import { OnlineLobby } from './components/OnlineLobby';
 import { OnlineRoom } from './components/OnlineRoom';
+import { Leaderboard } from './components/Leaderboard';
 
 function App() {
-  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover' | 'controls' | 'lobby' | 'room' | 'username'>('menu');
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover' | 'controls' | 'lobby' | 'room' | 'username' | 'leaderboard'>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('local');
   const [username, setUsername] = useState('');
   const [selectedMap, setSelectedMap] = useState<MapType>('forest');
@@ -49,6 +50,11 @@ function App() {
     setGameMode(mode);
     setIsOnline(false);
     
+    if (mode === 'wave' && !username) {
+      setGameState('username');
+      return;
+    }
+    
     if (mode === 'story') {
         setSelectedMap('castle');
         if (startLevel) {
@@ -86,6 +92,7 @@ function App() {
   };
 
   const startOnline = () => {
+    setGameMode('online');
     if (!username) {
       setGameState('username');
       return;
@@ -98,7 +105,11 @@ function App() {
   const handleUsernameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username.trim()) {
-      startOnline();
+      if (gameMode === 'wave') {
+        startGame('wave');
+      } else {
+        startOnline();
+      }
     }
   };
 
@@ -117,6 +128,14 @@ function App() {
     setFinalScores({p1: score1, p2: score2});
     if (wave !== undefined && time !== undefined) {
         setWaveRecord({ waves: wave, time: time });
+        
+        // Save score to leaderboard
+        const nameToSave = username || 'Anonymous';
+        fetch('/api/leaderboard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: nameToSave, waves: wave, time })
+        }).catch(err => console.error('Failed to save score', err));
     }
     setGameState('gameover');
   };
@@ -231,11 +250,23 @@ function App() {
                       <Shield className="w-5 h-5" />
                       CONTROLS
                     </button>
+
+                    <button
+                      onClick={() => setGameState('leaderboard')}
+                      className="px-12 py-4 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700 text-yellow-500 font-bold text-lg rounded-2xl hover:bg-zinc-700/50 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Trophy className="w-5 h-5" />
+                      LEADERBOARD
+                    </button>
                   </motion.div>
 
                   <p className="mt-12 text-zinc-500 text-sm font-medium tracking-widest uppercase">First to 3 Rounds Wins</p>
               </div>
             </motion.div>
+          )}
+
+          {gameState === 'leaderboard' && (
+            <Leaderboard onBack={() => setGameState('menu')} />
           )}
 
           {gameState === 'controls' && (

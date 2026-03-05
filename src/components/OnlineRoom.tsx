@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { socket } from '../socket';
 import { Room, ChatMessage, Player } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, User, Check, Shield, MessageSquare, X } from 'lucide-react';
+import { Send, User, Check, Shield, MessageSquare, X, Plus } from 'lucide-react';
 
 interface OnlineRoomProps {
   room: Room;
@@ -196,4 +196,4 @@ export const OnlineRoom: React.FC<OnlineRoomProps> = ({ room, onLeave, onStart }
   );
 };
 
-import { Plus } from 'lucide-react';
+

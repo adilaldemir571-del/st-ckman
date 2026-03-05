@@ -4,12 +4,30 @@ import { Server } from "socket.io";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import Database from 'better-sqlite3';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Initialize Database
+const db = new Database('leaderboard.db');
+db.exec(`
+  CREATE TABLE IF NOT EXISTS leaderboard (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    waves INTEGER NOT NULL,
+    time INTEGER NOT NULL,
+    date TEXT NOT NULL
+  )
+`);
+
 async function startServer() {
   const app = express();
+  app.use(express.json());
+  
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
@@ -19,6 +37,34 @@ async function startServer() {
   });
 
   const PORT = 3000;
+
+  // API Routes
+  app.get('/api/leaderboard', (req, res) => {
+    try {
+      const stmt = db.prepare('SELECT * FROM leaderboard ORDER BY waves DESC, time ASC LIMIT 10');
+      const records = stmt.all();
+      res.json(records);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      res.status(500).json({ error: 'Failed to fetch leaderboard' });
+    }
+  });
+
+  app.post('/api/leaderboard', (req, res) => {
+    const { username, waves, time } = req.body;
+    if (!username || waves === undefined || time === undefined) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+      const stmt = db.prepare('INSERT INTO leaderboard (username, waves, time, date) VALUES (?, ?, ?, ?)');
+      stmt.run(username, waves, time, new Date().toISOString());
+      res.status(201).json({ success: true });
+    } catch (error) {
+      console.error('Error saving score:', error);
+      res.status(500).json({ error: 'Failed to save score' });
+    }
+  });
 
   // Room state
   // rooms[roomId] = { players: { socketId: { id, name, color, ready } }, chat: [] }
