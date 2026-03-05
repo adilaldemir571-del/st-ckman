@@ -8,6 +8,7 @@ import { socket, connectSocket, disconnectSocket } from './socket';
 import { OnlineLobby } from './components/OnlineLobby';
 import { OnlineRoom } from './components/OnlineRoom';
 import { Leaderboard } from './components/Leaderboard';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover' | 'controls' | 'lobby' | 'room' | 'username' | 'leaderboard'>('menu');
@@ -153,6 +154,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 font-sans text-white selection:bg-orange-500/30">
+      <Analytics />
       <div className="w-full max-w-5xl aspect-[4/3] bg-black rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] relative border border-zinc-800/50">
         
         <AnimatePresence mode="wait">
